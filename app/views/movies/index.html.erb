@@ -3,12 +3,21 @@
 
 <%#  Part 2: Start here... %>
 
+<%= form_tag movies_path, :id => 'ratings_form', :method => :get do %>
+  Include:
+  <% @all_ratings.each do |rating| %>
+      <%= rating %>
+      <%= check_box_tag "ratings[#{rating}]", 1, !@filter.nil? ? @filter.include?(rating) : true %>
+  <% end %>
+  <%= submit_tag 'Refresh', :id => 'ratings_submit', :class => 'btn btn-primary btn-sm' %>
+<% end %>
+
 <table class="table table-striped col-md-12" id="movies">
   <thead>
     <tr>
-      <th class="<%= hilite_header(sort?('title')) %>"><%= link_to "Movie Title", {:sort => "title"}, :id => "title_header"%></th>
+      <th class="<%= hilite_header(sort?('title')) %>"><%= link_to "Movie Title", {:sort => "title"}, :id => "title_header" %></th>
       <th>Rating</th>
-      <th class="<%= hilite_header(sort?('release_date')) %>"><%= link_to "Release Date", {:sort => "release_date"}, :id => "release_date_header"%></th>
+      <th class="<%= hilite_header(sort?('release_date')) %>"><%= link_to "Release Date", {:sort => "release_date"}, :id => "release_date_header" %></th>
       <th>More Info</th>
     </tr>
   </thead>

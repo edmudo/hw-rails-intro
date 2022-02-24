@@ -1,5 +1,9 @@
 class MoviesController < ApplicationController
 
+    def self.ratings
+      return Movie.select(:rating).order(:rating).distinct.map { |movie| movie.rating }
+    end
+
     def show
       id = params[:id] # retrieve movie ID from URI route
       @movie = Movie.find(id) # look up movie by unique ID
@@ -7,8 +11,35 @@ class MoviesController < ApplicationController
     end
   
     def index
-      @order = params[:sort] if params.has_key?(:sort)
-      @movies = Movie.all.order(@order)
+      @all_ratings = MoviesController.ratings
+
+      used_session = false
+      if params.has_key?(:sort)
+        @order = params[:sort]
+        session[:sort] = params[:sort]
+      elsif session.has_key?(:sort)
+        @order = session[:sort]
+        used_session = true
+      else
+        @order = nil
+      end
+
+      if params.has_key?(:commit) && params.has_key?(:ratings)
+        @filter = params[:ratings].keys
+        session[:ratings] = @filter
+      elsif session.has_key?(:ratings)
+        @filter = session[:ratings]
+        used_session = true
+      else
+        @filter = @all_ratings
+      end
+
+      if used_session
+        flash.keep
+        redirect_to movies_path(ratings: @filter.map {|rating| [rating, 1]}.to_h, sort: @order, commit: 'Redirect')
+      end
+      @movies = Movie.all.where(rating: @filter).order(@order)
+      
     end
   
     def new
